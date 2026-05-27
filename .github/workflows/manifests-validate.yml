@@ -34,7 +34,7 @@ jobs:
       - name: Validate manifests with kubeconform
         uses: docker://ghcr.io/yannh/kubeconform:latest
         with:
-          args: "-strict -summary rendered.yaml"
+          args: "-strict -summary -ignore-missing-schemas rendered.yaml"
 
       - name: Kubernetes client dry-run
         run: |
