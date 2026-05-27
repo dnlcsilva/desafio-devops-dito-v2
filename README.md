@@ -22,6 +22,7 @@ Solução DevOps para provisionar e entregar uma API interna em Kubernetes, usan
 
 ```text
 .
+├── .github/workflows/
 ├── app/
 ├── iac/
 │   ├── backend/bootstrap/
@@ -33,7 +34,7 @@ Solução DevOps para provisionar e entregar uma API interna em Kubernetes, usan
 │   ├── argocd/
 │   ├── base/
 │   └── overlays/
-├── .github/workflows/
+├── .gitignore
 └── README.md
 ```
 
@@ -47,7 +48,7 @@ Solução DevOps para provisionar e entregar uma API interna em Kubernetes, usan
 - Docker
 - kubectl
 - AWS CLI (somente se quiser aplicar em uma conta AWS real)
-- kubeconform (opcional)
+- kubeconform
 
 ---
 
