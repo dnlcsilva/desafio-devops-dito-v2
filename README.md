@@ -89,12 +89,42 @@ kubectl kustomize manifests/overlays/staging
 kubectl kustomize manifests/overlays/production
 ```
 
-### Dry-run local
+## Validação estrutural com kubeconform
 
 ```bash
-kubectl apply --dry-run=client --validate=false -k manifests/overlays/staging
+kubectl kustomize manifests/overlays/staging > rendered-staging.yaml
 
-kubectl apply --dry-run=client --validate=false -k manifests/overlays/production
+kubeconform \
+  -strict \
+  -summary \
+  -ignore-missing-schemas \
+  rendered-staging.yaml
+```
+
+```bash
+kubectl kustomize manifests/overlays/production > rendered-production.yaml
+
+kubeconform \
+  -strict \
+  -summary \
+  -ignore-missing-schemas \
+  rendered-production.yaml
+```
+
+> Observação: `-ignore-missing-schemas` é usado porque `ExternalSecret` e `SecretStore` são CRDs do External Secrets Operator, e não recursos nativos do Kubernetes.
+
+### Dry-run local
+
+O `kubectl apply --dry-run=client` pode tentar consultar a API do cluster mesmo com `--validate=false`. Por isso, em ambiente local sem cluster Kubernetes configurado, a validação recomendada é usar `kubectl kustomize` + `kubeconform`.
+
+Se houvesse um cluster/kubeconfig válido, podia usar:
+
+```bash
+kubectl apply --dry-run=client --validate=false -f rendered-staging.yaml
+```
+
+```bash
+kubectl apply --dry-run=client --validate=false -f rendered-production.yaml
 ```
 
 ---
@@ -111,6 +141,10 @@ Teste:
 
 ```bash
 curl http://localhost:8080/health
+```
+
+```bash
+curl http://localhost:8080
 ```
 
 ---
