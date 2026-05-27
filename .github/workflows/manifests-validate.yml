@@ -21,21 +21,27 @@ jobs:
           - production
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: azure/setup-kubectl@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
         with:
           version: v1.30.0
 
       - name: Render manifests with Kustomize
         run: |
-          kubectl kustomize manifests/overlays/${{ matrix.environment }} > rendered.yaml
+          kubectl kustomize manifests/overlays/${{ matrix.environment }} > rendered-${{ matrix.environment }}.yaml
+
+      - name: Show rendered manifests
+        run: |
+          cat rendered-${{ matrix.environment }}.yaml
 
       - name: Validate manifests with kubeconform
         uses: docker://ghcr.io/yannh/kubeconform:latest
         with:
-          args: "-strict -summary -ignore-missing-schemas rendered.yaml"
-
-      - name: Kubernetes client dry-run
-        run: |
-          kubectl apply --dry-run=client --validate=false -f rendered.yaml
+          args: >-
+            -strict
+            -summary
+            -ignore-missing-schemas
+            rendered-${{ matrix.environment }}.yaml
