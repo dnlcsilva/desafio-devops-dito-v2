@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dito-api-production
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dito/desafio-devops-dito.git
+    targetRevision: main
+    path: manifests/overlays/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dito-api

@@ -1,0 +1,9 @@
+resources:
+  - ../../base
+patches:
+  - path: patch-deployment.yaml
+  - path: patch-externalsecret.yaml
+images:
+  - name: 123456789012.dkr.ecr.us-east-1.amazonaws.com/dito-api-staging-api
+    newName: 123456789013.dkr.ecr.us-east-1.amazonaws.com/dito-api-production-api
+    newTag: "production-approved"

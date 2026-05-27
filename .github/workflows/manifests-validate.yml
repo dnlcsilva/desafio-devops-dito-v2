@@ -1,0 +1,41 @@
+name: manifests-validate
+
+on:
+  pull_request:
+    paths:
+      - "manifests/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "manifests/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment:
+          - staging
+          - production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Render manifests with Kustomize
+        run: |
+          kubectl kustomize manifests/overlays/${{ matrix.environment }} > rendered.yaml
+
+      - name: Validate manifests with kubeconform
+        uses: docker://ghcr.io/yannh/kubeconform:latest
+        with:
+          args: "-strict -summary rendered.yaml"
+
+      - name: Kubernetes client dry-run
+        run: |
+          kubectl apply --dry-run=client --validate=false -f rendered.yaml

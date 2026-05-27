@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dito-api
+  namespace: dito-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dito-api
+  template:
+    metadata:
+      labels:
+        app: dito-api
+    spec:
+      serviceAccountName: dito-api
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: dito-api
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: dito-api
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: dito-api
+          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/dito-api-staging-api:replace-me
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: dito-api-config
+            - secretRef:
+                name: dito-api-database
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

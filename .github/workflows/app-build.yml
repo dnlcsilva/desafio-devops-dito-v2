@@ -1,0 +1,14 @@
+name: app-build
+on:
+  pull_request:
+    paths: ["app/**"]
+  push:
+    branches: [main]
+    paths: ["app/**"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t dito-api:${{ github.sha }} ./app
+      - run: echo "Push para ECR seria executado aqui com OIDC"

@@ -1,0 +1,28 @@
+name: terraform
+on:
+  pull_request:
+    paths: ["iac/**"]
+  push:
+    branches: [main]
+    paths: ["iac/**"]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [staging, production]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform fmt
+        working-directory: iac
+        run: terraform fmt -recursive -check
+      - name: Terraform init
+        working-directory: iac/envs/${{ matrix.environment }}
+        run: terraform init -backend=false
+      - name: Terraform validate
+        working-directory: iac/envs/${{ matrix.environment }}
+        run: terraform validate
